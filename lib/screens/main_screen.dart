@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import '../main.dart';
 import '../models/model.dart';
+import '../utils/csv_exporter.dart';
+import '../utils/csv_importer.dart';
 import '../utils/database_helper.dart';
 import 'dashboard_screen.dart';
 import 'mode_detail_screen.dart';
@@ -43,6 +45,37 @@ class ModelListScreenState extends State<ModelListScreen> {
       appBar: AppBar(
         title: const Text('HEALTHCARE MANIA'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.upload),
+            tooltip: 'CSVインポート',
+            onPressed: () async {
+              final count = await CsvImporter.import();
+              if (!mounted) return;
+              if (count > 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('$count 件インポートしました')),
+                );
+                updateListView();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('インポートできるデータがありませんでした')),
+                );
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'CSVエクスポート',
+            onPressed: () async {
+              if (modelList != null && modelList!.isNotEmpty) {
+                await CsvExporter.export(modelList!);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('エクスポートするデータがありません')),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.dashboard),
             onPressed: () {
